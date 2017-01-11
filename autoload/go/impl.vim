@@ -6,6 +6,7 @@ function! go#impl#Impl(...) abort
 
   let recv = ""
   let iface = ""
+  let posArg = ""
 
   if a:0 == 0
     " user didn't passed anything,  just called ':GoImpl'
@@ -28,24 +29,20 @@ function! go#impl#Impl(...) abort
     " i.e: 'GoImpl f *Foo io.Writer'
     let recv = join(a:000[:-2], ' ')
     let iface = a:000[-1]
+    let posArg = printf('-p %s:%s', expand('%'), line('.'))
   else
     call go#util#EchoError('usage: GoImpl {receiver} {interface}')
     return
   endif
 
-  let result = go#util#System(printf("%s '%s' '%s'", binpath, recv, iface))
+  let result = go#util#System(printf("%s -u %s '%s' '%s'", binpath, posArg, recv, iface))
   if go#util#ShellError() != 0
     call go#util#EchoError(result)
     return
   endif
 
-  if result ==# ''
-    return
-  end
-
   let pos = getpos('.')
-  put ='' 
-  put =result
+  silent! edit!
   call setpos('.', pos)
 endfunction
 
