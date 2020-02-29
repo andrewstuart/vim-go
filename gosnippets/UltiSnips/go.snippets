@@ -1,8 +1,6 @@
 # Snippets for Go
 
-priority -10
-
-# shorthand variable declaration
+priority -10 # shorthand variable declaration
 snippet : "v := value"
 ${1} := ${0}
 endsnippet
@@ -144,7 +142,7 @@ else {
 endsnippet
 
 # if inline error
-snippet ife "If with inline erro"
+snippet ife "If with inline error"
 if err := ${1:condition}; err != nil {
 	${0:${VISUAL}}
 }
@@ -154,6 +152,13 @@ endsnippet
 snippet errn "Error return" !b
 if err != nil {
 	return err
+}
+${0}
+endsnippet
+
+snippet errnw "Error return wrapf" !b
+if err != nil {
+	return fmt.Errorf("${1:message}: %w", err)
 }
 ${0}
 endsnippet
@@ -170,6 +175,13 @@ endsnippet
 snippet errn, "Error return with two return values" !b
 if err != nil {
 	return ${1:nil}, ${2:err}
+}
+${0}
+endsnippet
+
+snippet errn,w "Error return wrap with two return values" !b
+if err != nil {
+	return nil, fmt.Errorf("${1:message}: %w", err)
 }
 ${0}
 endsnippet
@@ -235,6 +247,20 @@ for ${2:k}, ${3:v} := range ${1} {
 }
 endsnippet
 
+snippet forsel "for select"
+for {
+	select {
+		case ${2:${1:result} := }<- ${3:channel}:
+			${0}
+	}
+}
+endsnippet
+
+snippet selc "select case" !b
+case ${1:${2:var} := }<-${3:channel}:
+	${0}
+endsnippet
+
 # function
 snippet func "func Function(...) [error] { ... }"
 func ${1:name}(${2:params})${3/(.+)/ /}`!p opening_par(snip, 3)`$3`!p closing_par(snip, 3)` {
@@ -244,7 +270,12 @@ endsnippet
 
 # Fmt Printf debug
 snippet ff "fmt.Printf(...)"
-fmt.Printf("${1:${VISUAL}} = %+v\n", $1)
+fmt.Printf("$1 = %+v\n", ${1:${VISUAL}})
+endsnippet
+
+# Fmt Printf debug with hash
+snippet ffh "fmt.Printf(#...) hash"
+fmt.Printf("$1 = %#v\n", ${1:${VISUAL}})
 endsnippet
 
 # Fmt Println debug
@@ -338,6 +369,12 @@ case ${2:value1}:
 }
 endsnippet
 
+snippet tswitch "type switch x { ... }"
+switch ${2:$1 := }${1:v}.(type) {
+	${0}
+}
+endsnippet
+
 # sprintf
 snippet sp "fmt.Sprintf(...)"
 fmt.Sprintf("%${1:s}", ${2:var})
@@ -385,15 +422,21 @@ for _, tt := range tests {
 endsnippet
 
 
-snippet hf "http.HandlerFunc" !b
+snippet hf "http.HandlerFunc"
 func ${1:handler}(w http.ResponseWriter, r *http.Request) {
 	${0:fmt.Fprintf(w, "hello world")}
 }
 endsnippet
 
-snippet hhf "mux.HandleFunc" !b
+snippet hhf "mux.HandleFunc"
 ${1:http}.HandleFunc("${2:/}", func(w http.ResponseWriter, r *http.Request) {
 	${0:fmt.Fprintf(w, "hello world")}
+})
+endsnippet
+
+snippet mux "Mux handler" !b
+${1:mux}.Path("${2:/path}").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	$0
 })
 endsnippet
 
@@ -419,6 +462,16 @@ snippet terf "if err != nil { t.Fatalf(...) }"
 if err != nil {
 	t.Fatalf("${0:message}")
 }
+endsnippet
+
+snippet tas "testify/assert.New" !b
+asrt := assert.New(t)
+$0
+endsnippet
+
+snippet tasr "testify/assert.New and testify/require.New" !b
+asrt, rq := assert.New(t), require.New(t)
+$0
 endsnippet
 
 snippet example "func ExampleXYZ() { ... }"
@@ -482,4 +535,95 @@ def closing_par(snip, pos):
 
 endglobal
 
+snippet dup "Repeat something"
+${1:something} $1$0
+endsnippet
+
+
+snippet lwe "logrus with error" !b
+${1:logrus}.WithError(${2:err}).${3:Error}("${4:something happened}")$0
+endsnippet
+
+snippet lwf "logrus with field" !b
+${1:logrus}.WithField("${2:foo}", ${3:"bar"}).${4:Info}("${5:something happened}")
+$0
+endsnippet
+
+snippet lwfs "logrus with fields"
+${1:logrus}.WithFields(logrus.Fields{
+	"${2:foo}": ${3:"bar"},
+})$0
+endsnippet
+
+snippet ew "error wrap"
+fmt.Errorf("${1:someMessage}: %w", ${2:err})
+endsnippet
+
+snippet rew "return errors.Wrap"
+return fmt.Errorf("${1:someMessage}: %w", ${2:err})
+endsnippet
+
+snippet sifc "Single-method interface with func implementation" !b
+type ${1:somethinger} interface {
+	${2:$1}(${3:param int}) ${4:bool}
+}
+
+type $1Func func($3) $4
+
+func (f $1Func) $2($3) $4 {
+	return f($3)
+}
+
+var _ $1 = ($1Func)(nil)
+endsnippet
+
+snippet first "first nonempty string" !b
+func first(ss ...string) string {
+	for _, s := range ss {
+		if s != "" {
+			return s
+		}
+	}
+	return ""
+}
+endsnippet
+
+snippet index "Index items by a key" !b
+${1:m} := map[${2:string}]${3:int}{}
+
+for k, v := range ${4:collection} {
+	m[k]=${5:v}
+}
+$0
+endsnippet
+
+snippet sigctx "signals ctx" !b
+${1:ctx}, ${2:cancel} := context.WithCancel(${3:context.Background()})
+
+go func() {
+	ch := make(chan os.Signal)
+	signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT)
+	for {
+		select {
+		case _, ok := <-ch:
+			$2()
+			if !ok {
+				return
+			}
+		}
+	}
+}()
+endsnippet
+
+snippet cwt "context.WithTimeout" !b
+${1:ctx}, cancel := context.WithTimeout(${3:context.Background()}, ${2:10*time.Seconds})
+defer cancel()
+endsnippet
+
+snippet cwd "context.WithDeadline" !b
+${1:ctx}, cancel := context.WithDeadline(${3:context.Background()}, ${2:time.Now().Add(60*time.Seconds)})
+defer cancel()
+endsnippet
+
 # vim:ft=snippets:
+
