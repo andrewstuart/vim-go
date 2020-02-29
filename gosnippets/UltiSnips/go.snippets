@@ -1,8 +1,6 @@
 # Snippets for Go
 
-priority -10
-
-# shorthand variable declaration
+priority -10 # shorthand variable declaration
 snippet : "v := value"
 ${1} := ${0}
 endsnippet
@@ -158,9 +156,9 @@ if err != nil {
 ${0}
 endsnippet
 
-snippet errnwf "Error return wrapf" !b
+snippet errnw "Error return wrapf" !b
 if err != nil {
-	return fmt.Errorf("${1:message: %w}", err)
+	return fmt.Errorf("${1:message}: %w", err)
 }
 ${0}
 endsnippet
@@ -183,14 +181,7 @@ endsnippet
 
 snippet errn,w "Error return wrap with two return values" !b
 if err != nil {
-	return nil, errors.Wrap(err, "${1:message}")
-}
-${0}
-endsnippet
-
-snippet errn,wf "Error return wrapf with two return values" !b
-if err != nil {
-	return nil, fmt.Errorf("${1:message: %w}", err)
+	return nil, fmt.Errorf("${1:message}: %w", err)
 }
 ${0}
 endsnippet
@@ -550,7 +541,7 @@ endsnippet
 
 
 snippet lwe "logrus with error" !b
-${1:logrus}.WithError(${2:err}).Error("${3:something happened}")
+${1:logrus}.WithError(${2:err}).${3:Error}("${4:something happened}")$0
 endsnippet
 
 snippet lwf "logrus with field" !b
@@ -564,16 +555,12 @@ ${1:logrus}.WithFields(logrus.Fields{
 })$0
 endsnippet
 
-snippet ew "errors.Wrap"
-errors.Wrap(${2:err}, "${3:someMessage}")
-endsnippet
-
-snippet ewf "errors.Wrapf"
-errors.Wrapf(${2:err}, "${3:someMessage %#v}", ${4:someargs...})
+snippet ew "error wrap"
+fmt.Errorf("${1:someMessage}: %w", ${2:err})
 endsnippet
 
 snippet rew "return errors.Wrap"
-return errors.Wrap(${2:err}, "${3:someMessage}")
+return fmt.Errorf("${1:someMessage}: %w", ${2:err})
 endsnippet
 
 snippet sifc "Single-method interface with func implementation" !b
@@ -599,6 +586,43 @@ func first(ss ...string) string {
 	}
 	return ""
 }
+endsnippet
+
+snippet index "Index items by a key" !b
+${1:m} := map[${2:string}]${3:int}{}
+
+for k, v := range ${4:collection} {
+	m[k]=${5:v}
+}
+$0
+endsnippet
+
+snippet sigctx "signals ctx" !b
+${1:ctx}, ${2:cancel} := context.WithCancel(${3:context.Background()})
+
+go func() {
+	ch := make(chan os.Signal)
+	signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT)
+	for {
+		select {
+		case _, ok := <-ch:
+			$2()
+			if !ok {
+				return
+			}
+		}
+	}
+}()
+endsnippet
+
+snippet cwt "context.WithTimeout" !b
+${1:ctx}, cancel := context.WithTimeout(${3:context.Background()}, ${2:10*time.Seconds})
+defer cancel()
+endsnippet
+
+snippet cwd "context.WithDeadline" !b
+${1:ctx}, cancel := context.WithDeadline(${3:context.Background()}, ${2:time.Now().Add(60*time.Seconds)})
+defer cancel()
 endsnippet
 
 # vim:ft=snippets:
