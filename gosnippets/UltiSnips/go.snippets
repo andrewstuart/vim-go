@@ -144,7 +144,7 @@ else {
 endsnippet
 
 # if inline error
-snippet ife "If with inline erro"
+snippet ife "If with inline error"
 if err := ${1:condition}; err != nil {
 	${0:${VISUAL}}
 }
@@ -158,16 +158,9 @@ if err != nil {
 ${0}
 endsnippet
 
-snippet errnw "Error return wrap" !b
-if err != nil {
-	return errors.Wrap(err, "${1:message}")
-}
-${0}
-endsnippet
-
 snippet errnwf "Error return wrapf" !b
 if err != nil {
-	return errors.Wrapf(err, "${1:message %s}", ${2:err})
+	return fmt.Errorf("${1:message: %w}", err)
 }
 ${0}
 endsnippet
@@ -197,7 +190,7 @@ endsnippet
 
 snippet errn,wf "Error return wrapf with two return values" !b
 if err != nil {
-	return nil, errors.Wrapf(err, "${1:message %s}", ${2:err})
+	return nil, fmt.Errorf("${1:message: %w}", err)
 }
 ${0}
 endsnippet
@@ -266,15 +259,15 @@ endsnippet
 snippet forsel "for select"
 for {
 	select {
-		case ${2:${1:result} := }<- ${3:someChan}:
+		case ${2:${1:result} := }<- ${3:channel}:
 			${0}
 	}
 }
 endsnippet
 
 snippet selc "select case" !b
-case ${1:${2:var} := }<-${3:someChan}:
-  ${0}
+case ${1:${2:var} := }<-${3:channel}:
+	${0}
 endsnippet
 
 # function
