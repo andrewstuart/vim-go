@@ -559,7 +559,7 @@ function! go#util#SetEnv(name, value) abort
 endfunction
 
 function! go#util#ClearHighlights(group) abort
-  if exists('*prop_remove')
+  if has('textprop')
     " the property type may not exist when syntax highlighting is not enabled.
     if empty(prop_type_get(a:group))
       return
@@ -617,7 +617,7 @@ endfunction
 " pos should be a list of 3 element lists. The lists should be [line, col,
 " length] as used by matchaddpos().
 function! go#util#HighlightPositions(group, pos) abort
-  if exists('*prop_add')
+  if has('textprop')
     for l:pos in a:pos
       " use a single line prop by default
       let l:prop = {'type': a:group, 'length': l:pos[2]}
@@ -676,6 +676,15 @@ function! s:matchaddpos(group, pos) abort
   for l:positions in l:partitions
     call matchaddpos(a:group, l:positions)
   endfor
+endfunction
+
+function! go#util#Chdir(dir) abort
+  if !exists('*chdir')
+    let cd = exists('*haslocaldir') && haslocaldir() ? 'lcd ' : 'cd '
+    execute cd . a:dir
+    return
+  endif
+  call chdir(a:dir)
 endfunction
 
 " restore Vi compatibility settings
