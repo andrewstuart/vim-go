@@ -14,6 +14,15 @@ IMPROVEMENTS:
 * Default `g:go_gopls_options` to `[-remote=auto]` to share gopls instances
   with other plugins and multiple instances of Vim.
   [[GH-2905]](https://github.com/fatih/vim-go/pull/2905)
+* Use the module root as the working directory when renaming so that all
+  references to the symbol will be renamed when in module aware mode and
+  `g:go_rename_command` is set to `gopls`.
+  [[GH-2917]](https://github.com/fatih/vim-go/pull/2917)
+* Change `g:go_rename_command`'s default to `gopls`.
+  [[GH-2922]](https://github.com/fatih/vim-go/pull/2922)
+* Do not send unnecessary textDocument/didChange notifications to `gopls`.
+  [[GH-2902]](https://github.com/fatih/vim-go/pull/2902)
+  [[GH-2930]](https://github.com/fatih/vim-go/pull/2930)
 
 BUG FIXES:
 * Fix call to non-existent function in terminal mode edge case.
@@ -30,7 +39,8 @@ BUG FIXES:
 * Use the resolved directory name for `gopls`' working directory when `go.mod`
   is in a symlinked path.
   [[GH-2913]](https://github.com/fatih/vim-go/pull/2913)
-
+* Fix buffer reuse with `:GoDef`.
+  [[GH-2928]](https://github.com/fatih/vim-go/pull/2928)
 
 ## v1.23 - (May 16, 2020)
 
