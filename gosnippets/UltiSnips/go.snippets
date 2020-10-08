@@ -613,16 +613,15 @@ snippet sigctx "signals ctx" !b
 ${1:ctx}, ${2:cancel} := context.WithCancel(${3:context.Background()})
 
 go func() {
-	ch := make(chan os.Signal)
+	ch := make(chan os.Signal, 2)
 	signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT)
-	for {
-		select {
-		case _, ok := <-ch:
-			$2()
-			if !ok {
-				return
-			}
+	i := 0
+	for range ch {
+		i++
+		${4:if i > 1 {
+			os.Exit(1)
 		}
+		}$2()
 	}
 }()
 endsnippet
@@ -635,6 +634,11 @@ endsnippet
 snippet cwd "context.WithDeadline" !b
 ${1:ctx}, cancel := context.WithDeadline(${3:context.Background()}, ${2:time.Now().Add(60*time.Seconds)})
 defer cancel()
+endsnippet
+
+snippet sd "spew dump" !b
+log.Println("$1")
+spew.Dump(${1:something})
 endsnippet
 
 # vim:ft=snippets:
